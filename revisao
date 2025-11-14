@@ -1,0 +1,194 @@
+-- Exclui tabelas dependentes primeiro
+DROP TABLE IF EXISTS cursa;
+DROP TABLE IF EXISTS telefone_aluno;
+DROP TABLE IF EXISTS pre_requisito;
+DROP TABLE IF EXISTS aluno_graduacao;
+DROP TABLE IF EXISTS aluno_pos_graduacao;
+DROP TABLE IF EXISTS disciplina;
+DROP TABLE IF EXISTS professor;
+DROP TABLE IF EXISTS aluno;
+DROP TABLE IF EXISTS departamento;
+
+---
+
+-- 1. Criação da Tabela DEPARTAMENTO
+create table departamento (
+	codigo serial primary key,
+	nome varchar(255) not null
+);
+
+-- 2. Criação da Tabela ALUNO
+create table aluno(
+	codigo serial primary key,
+	nome varchar(255) not null,
+	endereco varchar(255) not null
+);
+
+-- 3. Criação da Tabela PROFESSOR
+create table professor(
+	codigo serial primary key,
+	nome varchar(255) not null,
+	codigo_dep integer not null,
+	foreign key (codigo_dep) references departamento(codigo)
+);
+
+-- 4. Criação da Tabela DISCIPLINA
+create table disciplina(
+	codigo serial primary key,
+	nome varchar(255) not null,
+	ementa varchar(255) not null,
+	num_creditos integer not null,
+	codigo_dep integer not null,
+	codigo_pro integer not null,
+	foreign key (codigo_dep) references departamento(codigo),
+	foreign key (codigo_pro) references professor(codigo)
+);
+
+-- 5. Criação da Tabela PRE_REQUISITO
+create table pre_requisito(
+	codigo serial primary key,
+	codigo_dis integer not null,
+	foreign key (codigo_dis) references disciplina(codigo)
+);
+
+-- 6. Criação da Tabela TELEFONE_ALUNO
+create table telefone_aluno(
+	codigo serial primary key,
+	numero varchar(255) not null,
+	codigo_alu integer not null,
+	foreign key (codigo_alu) references aluno(codigo)
+);
+
+-- 7. Criação da Tabela ALUNO_GRADUACAO
+create table aluno_graduacao(
+	codigo serial primary key,
+	ano_ingresso integer not null
+);
+
+-- 8. Criação da Tabela ALUNO_POS_GRADUACAO
+create table aluno_pos_graduacao(
+	codigo serial primary key,
+	formacao varchar(255) not null,
+	codigo_pro integer not null,
+	foreign key (codigo_pro) references professor(codigo)
+);
+
+-- 9. Criação da Tabela CURSA (Muitos-para-Muitos entre Disciplina e Aluno)
+create table cursa(
+	media float not null,
+	ferequencia float not null,
+	codigo_dis integer not null,
+	codigo_alu integer not null,
+	-- Adicionando Chave Primária Composta, que é padrão para tabelas M:N
+	primary key (codigo_dis, codigo_alu), 
+	foreign key (codigo_dis) references disciplina(codigo),
+	foreign key (codigo_alu) references aluno(codigo)
+);
+
+alter table Aluno
+add registroAcademico integer not null; -- adicionando uma coluna 
+
+alter table Aluno 
+drop column registroAcademico; -- excluindo a coluna
+
+-- INSERÇÃO DE DADOS
+-- insert into <nome-da-tabela> (campos)
+-- values (valores a serem adicionados);
+
+-- inserindo esse dadp na tabela departamento, no campo nome, e vai ser Computação
+insert into Departamento (nome)
+values ('Computação');
+
+insert into Departamento (nome)
+values ('Computação');
+
+insert into Departamento (nome)
+values ('Computação');
+
+
+--fazendo um select para ver se realmente inseriu
+-- select * from nome-da-tabela;
+select * from Departamento;
+
+-- esse ,1 ... ,2 é a posição na tabela, no caso ligado a serial
+insert into Professor (nome, codigo_dep)
+values ('Alan dos Santos', 1);
+
+
+insert into Professor (nome, codigo_dep)
+values ('Paula de Souza', 1);
+
+
+insert into Professor (nome, codigo_dep)
+values ('Camila Ferreira', 2);
+
+
+insert into Professor (nome, codigo_dep)
+values ('Sérgio Lima', 1);
+
+-- apareceu "INSERT 0 1" como resultado, significa que uma nova linha foi add
+
+
+-- tinha um parenteses extra ('string'), 1,2)
+-- como os atributos estão como NOT NULL, não aceita fazer assim
+
+/*
+insert into Disciplina (nome, ementa, codigo_dep, codigo_pro)
+values ('Programação I', 'Variáveis, expressões, condicionais e laço de repetição', 1, 1);
+
+insert into Disciplina (nome, ementa, codigo_dep, codigo_pro)
+values ('Programação II', 'Algoritmo de Busca e Ordenação', 1, 2);
+
+insert into Disciplina (nome, ementa, codigo_dep, codigo_pro)
+values ('Introdução à Administração', 'Conceitos iniciais de ADM', 1, 3);
+
+insert into AlunoGraduacao values (1, 2021);
+insert into AlunoGraduacao values (1, 2029);
+
+insert into AlunoPosGraduacao
+values (3, 'Ciência da Computação', 1);
+*/
+
+
+
+-- apagar dados de uma tabela
+delete from aluno
+where codigo = 1;
+
+--selecionar dados de uma tabela ou mais (JOIN)
+-- select (campos) from nome-tabela;
+-- o nome daonde quero puxar tem que ser um atributo que está na mesma tabela,
+-- pk exemplo n exise codigo_dep em departamento, ent lá n funciona, seria só "codigo"
+select nome from departamento
+where codigo = 1;
+
+select * from aluno
+where nome like  '%Santos%'; 
+-- % na frente puxa só se for sobrenomme, % no final puxa só quem começa com Santos< %  % em qualquer parte
+
+-- Ordenação de registros
+select * from professor
+order by nome desc;
+-- desc de decrescente, pra puxar o contrario, se eu tirar o desc vai em ordem crescente, no caso alfabética
+
+-- distinct olha a tabela inteira e pega um registro de cada, qualquer um.
+-- select distinct <atributo> from <tabela>
+select  distinct nome
+from professor;
+
+-- INNER JOIN, é o padrão join é inner se eu simplesmente coloco como codigo = codigo, da ambiguidade,
+-- ent eu coloco tabela.atributo = tabela.atributo
+-- selecione tudo de disciplina que esteja conectado com professor, aonde tem que ser igual
+select * from disciplina
+join professor on (disciplina.codigo_pro = professor.codigo);
+
+/*
+EXERCICIO
+faça a inserçõ de pelomenos 2 registros em cada tabela do banco
+remova os estudantes da graduação que ingressaram em 2021
+faça uma consukta e verifique quandos alunos existem no banco de dados
+selecione o nome das diciplinas que possuem pre-requisito
+
+
+/*
+
